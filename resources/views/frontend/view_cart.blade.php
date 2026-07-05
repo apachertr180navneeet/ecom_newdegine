@@ -1,11 +1,20 @@
 @extends('frontend.layouts.app')
 
 @section('content')
-    <!-- Cart Details -->
-    <section class="my-4" id="cart-details">
-        @include('frontend.partials.cart.cart_details', ['carts' => $carts])
-    </section>
+    <div class="container-fluid p-0 mx-auto bg-white position-relative" style="max-width: 480px; min-height: 100vh; box-shadow: 0 0 20px rgba(0,0,0,0.05); padding-bottom: 80px !important;">
+        <!-- Mobile App Header -->
+        <div class="d-flex align-items-center justify-content-between p-3" style="background-color: #502288; color: white; position: sticky; top: 0; z-index: 100;">
+            <div class="d-flex align-items-center gap-3">
+                <a href="{{ url()->previous() }}" class="text-white"><i class="las la-arrow-left fs-24"></i></a>
+                <h5 class="mb-0 fw-600 fs-16">Shopping Cart</h5>
+            </div>
+        </div>
 
+        <!-- Cart Details -->
+        <section class="my-3 px-3" id="cart-details">
+            @include('frontend.partials.cart.cart_details', ['carts' => $carts])
+        </section>
+    </div>
 @endsection
 
 @section('script')

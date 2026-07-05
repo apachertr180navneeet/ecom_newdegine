@@ -370,21 +370,45 @@
                                                 <path id="Path_28699" data-name="Path 28699"
                                                     d="M5.33,3h-1L3,5,6,9,4.331,5Z" transform="translate(0 0)"
                                                     fill="#f3af3d" opacity="0.5" />
-                                                <path id="Path_28700" data-name="Path 28700"
-                                                    d="M12.666,3h1L15,5,12,9l1.664-4Z" transform="translate(-5.995 0)"
-                                                    fill="#f3af3d" />
-                                            </g>
-                                        </g>
-                                    </svg>
-                                    <small class="fs-11 fw-500 text-white ml-2">{{ translate('Club Point') }}:
-                                        {{ $detailedProduct->earn_point }}</small>
-                                </div>
-                        </div>
-                    </div>
-                </div>
-            @endif
-        @endif
+<div class="text-left px-2">
+    <!-- Brand Logo & Name -->
+    @if ($detailedProduct->brand != null)
+        <div class="d-flex flex-wrap align-items-center mb-2">
+            <span class="text-secondary fs-12 mr-2">{{ translate('Brand') }}:</span>
+            <a href="{{ route('products.brand', $detailedProduct->brand->slug) }}" class="text-primary fs-12 fw-600">{{ $detailedProduct->brand->name }}</a>
+        </div>
     @endif
+
+    <!-- Product Name -->
+    <h1 class="mb-2 fs-22 fw-800 text-dark" style="font-family: 'Playfair Display', serif; line-height: 1.3;">
+        {{ $detailedProduct->getTranslation('name') }}
+    </h1>
+
+    <div class="d-flex align-items-center mb-3">
+        @if ($detailedProduct->auction_product != 1)
+            @php
+                $total = $detailedProduct->reviews->where('status', 1)->count();
+            @endphp
+            <div class="d-flex align-items-center bg-light px-2 py-1 rounded-pill">
+                <i class="las la-star text-warning fs-16 mr-1"></i>
+                <span class="fs-13 fw-700 text-dark">{{ number_format($detailedProduct->rating, 1) }}</span>
+                <span class="ml-1 text-muted fs-12">({{ $total }} Reviews)</span>
+            </div>
+        @endif
+        @if ($detailedProduct->est_shipping_days)
+            <div class="ml-3 fs-12 text-muted">
+                <i class="las la-shipping-fast mr-1"></i>{{ $detailedProduct->est_shipping_days }} {{ translate('Days') }}
+            </div>
+        @endif
+    </div>
+
+    <!-- Price -->
+    <div class="d-flex align-items-center gap-2 mb-4">
+        <strong class="fs-24 fw-900 text-dark">{{ home_discounted_base_price($detailedProduct) }}</strong>
+        @if (home_base_price($detailedProduct) != home_discounted_base_price($detailedProduct))
+            <del class="text-muted fs-16 ml-2">{{ home_base_price($detailedProduct) }}</del>
+        @endif
+    </div>
 
     @if ($detailedProduct->auction_product != 1)
         <form id="option-choice-form" class="product-details-page">
@@ -392,29 +416,23 @@
             <input type="hidden" name="id" value="{{ $detailedProduct->id }}">
 
             @if ($detailedProduct->digital == 0)
-                <!-- Choice Options -->
+                <!-- Choice Options (Size, etc) -->
                 @if ($detailedProduct->choice_options != null)
                     @foreach (json_decode($detailedProduct->choice_options) as $key => $choice)
-                        <div class="row no-gutters mb-3">
-                            <div class="col-sm-2">
-                                <div class="text-secondary fs-13 fw-400 mt-2 ">
-                                    {{ get_single_attribute_name($choice->attribute_id) }}
-                                </div>
+                        <div class="mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <span class="text-dark fs-15 fw-700">{{ get_single_attribute_name($choice->attribute_id) }}</span>
+                                <a href="#" class="text-muted fs-12 text-decoration-underline">Size Guide</a>
                             </div>
-                            <div class="col-sm-10">
-                                <div class="aiz-radio-inline">
-                                    @foreach ($choice->values as $key => $value)
-                                        <label class="aiz-megabox pl-0 mr-1 mb-2">
-                                            <input type="radio" name="attribute_id_{{ $choice->attribute_id }}"
-                                                value="{{ $value }}"
-                                                @if ($key == 0) checked @endif>
-                                            <span
-                                                class="aiz-megabox-elem rounded-0 d-flex align-items-center justify-content-center py-1 px-3">
-                                                {{ $value }}
-                                            </span>
-                                        </label>
-                                    @endforeach
-                                </div>
+                            <div class="aiz-radio-inline d-flex flex-wrap gap-2">
+                                @foreach ($choice->values as $key => $value)
+                                    <label class="aiz-megabox mb-0">
+                                        <input type="radio" name="attribute_id_{{ $choice->attribute_id }}" value="{{ $value }}" @if ($key == 0) checked @endif onchange="getVariantPrice()">
+                                        <span class="aiz-megabox-elem rounded-circle d-flex align-items-center justify-content-center fw-600 shadow-sm" style="width: 45px; height: 45px; font-size: 14px; transition: 0.2s;">
+                                            {{ $value }}
+                                        </span>
+                                    </label>
+                                @endforeach
                             </div>
                         </div>
                     @endforeach
@@ -422,251 +440,75 @@
 
                 <!-- Color Options -->
                 @if ($detailedProduct->colors != null && count(json_decode($detailedProduct->colors)) > 0)
-                    <div class="row no-gutters mb-3">
-                        <div class="col-sm-2">
-                            <div class="text-secondary fs-13 fw-400 mt-2">{{ translate('Color') }}</div>
-                        </div>
-                        <div class="col-sm-10">
-                            <div class="aiz-radio-inline">
-                                @foreach (json_decode($detailedProduct->colors) as $key => $color)
-                                    <label class="aiz-megabox pl-0 mr-1 mb-0" data-toggle="tooltip"
-                                        data-title="{{ get_single_color_name($color) }}">
-                                        <input type="radio" name="color"
-                                            value="{{ get_single_color_name($color) }}"
-                                            @if ($key == 0) checked @endif>
-                                        <span
-                                            class="aiz-megabox-elem rounded-0 d-flex align-items-center justify-content-center p-1">
-                                            <span class="size-25px d-inline-block rounded"
-                                                style="background: {{ $color }};"></span>
-                                        </span>
-                                    </label>
-                                @endforeach
-                            </div>
+                    <div class="mb-4">
+                        <div class="text-dark fs-15 fw-700 mb-2">{{ translate('Color') }}</div>
+                        <div class="aiz-radio-inline d-flex flex-wrap gap-2">
+                            @foreach (json_decode($detailedProduct->colors) as $key => $color)
+                                <label class="aiz-megabox mb-0" data-toggle="tooltip" data-title="{{ get_single_color_name($color) }}">
+                                    <input type="radio" name="color" value="{{ get_single_color_name($color) }}" @if ($key == 0) checked @endif onchange="getVariantPrice()">
+                                    <span class="aiz-megabox-elem rounded-circle d-flex align-items-center justify-content-center shadow-sm" style="width: 35px; height: 35px; padding: 3px;">
+                                        <span class="d-inline-block rounded-circle w-100 h-100" style="background: {{ $color }};"></span>
+                                    </span>
+                                </label>
+                            @endforeach
                         </div>
                     </div>
                 @endif
 
-                <!-- Total Price -->
-                <div class="row no-gutters pb-3 d-none" id="chosen_price_div">
-                    <div class="col-sm-2">
-                        <div class="text-secondary fs-13 fw-400 mt-1">{{ translate('Total Price') }}</div>
-                    </div>
-                    <div class="col-sm-10">
-                        <div class="product-price">
-                            <strong id="chosen_price" class="fs-18 fw-700">
-
-                            </strong>
-                        </div>
-                    </div>
+                <!-- Hidden Price Update div for AJAX script -->
+                <div class="d-none" id="chosen_price_div">
+                    <strong id="chosen_price"></strong>
                 </div>
 
-                <!-- Quantity + Add to cart -->
-               <div class="row no-gutters mb-3">
-                    <div class="col-sm-5 d-flex">
-                        <div class="fs-13 fw-400 text-secondary">{{ translate('Quantity') }}</div>
-                        @php
-                            $qty = 0;
-                            foreach ($detailedProduct->stocks as $key => $stock) {
-                                $qty += $stock->qty;
-                            }
-                        @endphp
-
-                        <div class="avialable-amount opacity-60 ml-1">
-                            @if ($detailedProduct->stock_visibility_state == 'quantity')
-                               (<span id="available-quantity">{{ $qty }}</span>
-                                {{ translate('available') }})
-                            @elseif($detailedProduct->stock_visibility_state == 'text' && $qty >= 1)
-                                (<span id="available-quantity">{{ translate('In Stock') }}</span>)
-                            @endif
-                        </div>
-                       
-                    </div>
-                     <!-- Add to cart & Buy now Buttons -->
-                    <div class="col-sm-4">
-                        
-                    </div>
-                    <div class="col-sm-3"></div>
-                </div>
-
-              
-                <div class="row  no-gutters mb-3">
-                 <!-- Add to cart & Buy now Buttons -->
-                    <div class="col-sm-9">
-                        <div class="product-quantity d-flex align-items-center">
-                            <div class="row no-gutters align-items-center aiz-plus-minus mr-3" style="width: 130px;">
-                                <button class="btn col-auto btn-icon btn-md btn-light rounded-0" type="button" data-type="minus" data-field="quantity" disabled="">
-                                    <i class="las la-minus"></i>
-                                </button>
-                                <input type="number" name="quantity" class="col border-0 text-center flex-grow-1 fs-16 input-number" placeholder="1" value="{{ $detailedProduct->min_qty }}" min="{{ $detailedProduct->min_qty }}" max="10" lang="en">
-                                <button class="btn col-auto btn-icon btn-md btn-light rounded-0" type="button" data-type="plus" data-field="quantity">
-                                    <i class="las la-plus"></i>
-                                </button>
-                            </div>
-
-                            @if (((get_setting('product_external_link_for_seller') == 1) && ($detailedProduct->added_by == "seller") && ($detailedProduct->external_link != null)) || (($detailedProduct->added_by != "seller") && ($detailedProduct->external_link != null)))
-                            <a type="button" class="btn bg-soft-primary add-to-cart fw-600 min-w-150px w-100 rounded-1 text-primary hov-bg-primary hov-text-light px-4 " href="{{ $detailedProduct->external_link }}">
-                                <i class="la la-share"></i> {{ translate($detailedProduct->external_link_btn) }}
-                            </a>
-                            @else
-                            <button type="button" class="modern-btn modern-btn-primary fw-600 min-w-150px w-75 rounded-1 hov-bg-primary hov-text-light" @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
-                                <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
-                            </button>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-sm-3"></div>
-                </div>
-                <div class="row no-gutters">
-                    <div class="col-sm-9">
-                        <div class="product-quantity d-flex align-items-center">
-                            @if (((get_setting('product_external_link_for_seller') == 1) && ($detailedProduct->added_by == "seller") && ($detailedProduct->external_link != null)) || (($detailedProduct->added_by != "seller") && ($detailedProduct->external_link != null)))
-                            @else
-                            <button type="button" class="modern-btn modern-btn-secondary buy-now fw-600 add-to-cart min-w-150px rounded-1 w-100" @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="buyNow()" @else onclick="showLoginModal()" @endif>
-                                <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
-                            </button>
-                            <button type="button" class="modern-btn modern-btn-secondary out-of-stock fw-600 d-none" disabled>
-                                <i class="la la-cart-arrow-down"></i> {{ translate('Out of Stock') }}
-                            </button>
-                            @endif
-                        </div>
-                    </div>
-                    <div class="col-sm-3"></div>
-                </div>
-            @else
-
-                <!-- Total Price -->
-                <div class="row no-gutters mb-3 d-none" id="chosen_price_div">
-                    <div class="col-sm-2">
-                        <div class="text-secondary fs-13 fw-400 mt-1">{{ translate('Total Price') }}</div>
-                    </div>
-                    <div class="col-sm-10">
-                        <div class="product-price">
-                            <strong id="chosen_price" class="fs-18 fw-700 ">
-
-                            </strong>
-                        </div>
-                    </div>
-                </div>
                 <!-- Quantity -->
-                <input type="hidden" name="quantity" value="1">
-
-                @if ($detailedProduct->digital == 1)
-                <div class="row no-gutters mb-3">
-                    <div class="col-sm-9">
-                        <button type="button"
-                            class="modern-btn modern-btn-primary add-to-cart fw-600 min-w-150px w-100 rounded-1 hov-bg-primary hov-text-light"
-                            @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="addToCart()" @else onclick="showLoginModal()" @endif>
-                            <i class="las la-shopping-bag"></i> {{ translate('Add to cart') }}
-                        </button>
-                    </div>
-                    <div class="col-sm-3"></div>
-                </div>
-                <div class="row no-gutters mb-3">
-                    <div class="col-sm-9">
-                        <button type="button" class="modern-btn modern-btn-secondary buy-now fw-600 add-to-cart min-w-150px rounded-1 w-100"
-                            @if (Auth::check() || get_Setting('guest_checkout_activation')==1) onclick="buyNow()" @else onclick="showLoginModal()" @endif>
-                            
-                            <i class="la la-shopping-cart"></i> {{ translate('Buy Now') }}
-                        </button>
-                    </div>
-                    <div class="col-sm-3"></div>
-                </div>
-                @endif
-            @endif
-
-
-        </form>
-    @endif
-
-    @if ($detailedProduct->auction_product)
-        @php
-            $highest_bid = $detailedProduct->bids->max('amount');
-            $min_bid_amount = $highest_bid != null ? $highest_bid + 1 : $detailedProduct->starting_bid;
-            $gst_rate = gst_applicable_product_rate($detailedProduct->id);
-        @endphp
-        @if ($detailedProduct->auction_end_date >= strtotime('now'))
-            <div class="mt-4">
-                @if (Auth::check() && $detailedProduct->user_id == Auth::user()->id)
-                    <span
-                        class="badge badge-inline badge-danger">{{ translate('Seller cannot Place Bid to His Own Product') }}</span>
-                @else
-                    <button type="button" class="btn btn-primary buy-now  fw-600 min-w-150px rounded-0"
-                        onclick="bid_modal()">
-                        <i class="las la-gavel"></i>
-                        @if (Auth::check() &&
-                                Auth::user()->product_bids->where('product_id', $detailedProduct->id)->first() != null)
-                            {{ translate('Change Bid') }}
-                        @else
-                            {{ translate('Place Bid') }}
-                        @endif
+                <div class="mb-4 d-flex align-items-center justify-content-between bg-light p-2 rounded-pill" style="max-width: 150px;">
+                    <button class="btn btn-icon btn-sm rounded-circle shadow-sm bg-white" type="button" data-type="minus" data-field="quantity" disabled="">
+                        <i class="las la-minus text-dark fs-16"></i>
                     </button>
-                @endif
-            </div>
-        @endif
-    @else
-   
-   
-
-
-        <!-- Refund -->
-        @php
-            $refund_sticker = get_setting('refund_sticker');
-        @endphp
-            <div class="row no-gutters mt-3">
-                <div class="col-sm-2">
-                    <div class="text-secondary fs-13 fw-400 mt-2">{{ translate('Refund') }}</div>
+                    <input type="number" name="quantity" class="border-0 text-center flex-grow-1 bg-transparent fs-16 fw-700 text-dark input-number p-0" style="width: 40px; outline: none;" placeholder="1" value="{{ $detailedProduct->min_qty }}" min="{{ $detailedProduct->min_qty }}" max="10" lang="en">
+                    <button class="btn btn-icon btn-sm rounded-circle shadow-sm bg-white" type="button" data-type="plus" data-field="quantity">
+                        <i class="las la-plus text-dark fs-16"></i>
+                    </button>
                 </div>
-                <div class="col-sm-10">
-                    @if ($detailedProduct->refundable == 1)
-                        <a href="{{ route('returnpolicy') }}" target="_blank">
-                            @if ($refund_sticker != null)
-                                <img src="{{ uploaded_asset($refund_sticker) }}" height="36">
-                            @else
-                                <img src="{{ static_asset('assets/img/refund-sticker.jpg') }}" height="36">
-                            @endif
-                        </a>
-                        @if($detailedProduct->refund_note_id != null)
-                            <span href="javascript:void(1);" 
-                                data-toggle="modal" data-target="#refund-note-modal"
-                                class="border-bottom border-bottom-4 ml-2 text-secondary-base">
-                                {{ translate('Refund Note') }}
-                            </span>
-                        @endif
-                        
-                        <a href="{{ route('returnpolicy') }}" class="text-blue hov-text-primary fs-13 ml-3" target="_blank">{{ translate('View Policy') }}</a>
-                        
+                
+                @php
+                    $qty = 0;
+                    foreach ($detailedProduct->stocks as $key => $stock) {
+                        $qty += $stock->qty;
+                    }
+                @endphp
+                <div class="fs-12 text-success fw-600 mb-4">
+                    <i class="las la-check-circle mr-1"></i>
+                    @if ($detailedProduct->stock_visibility_state == 'quantity')
+                        <span id="available-quantity">{{ $qty }}</span> {{ translate('available in stock') }}
                     @else
-                        <div class="text-dark fs-13 fw-400 mt-2">{{ translate('Not Applicable') }}</div>
+                        {{ translate('In Stock') }}
                     @endif
                 </div>
-            </div>
 
-        <!-- Seller Guarantees -->
-        @if ($detailedProduct->digital == 1)
-            @if ($detailedProduct->added_by == 'seller')
-                <div class="row no-gutters mt-3">
-                    <div class="col-2">
-                        <div class="text-secondary fs-13 fw-400">{{ translate('Seller Guarantees') }}</div>
-                    </div>
-                    <div class="col-10">
-                        @if ($detailedProduct->user->shop->verification_status == 1)
-                            <span class="text-success fs-13 fw-700">{{ translate('Verified seller') }}</span>
-                        @else
-                            <span class="text-danger fs-13 fw-700">{{ translate('Non verified seller') }}</span>
-                        @endif
-                    </div>
+                <!-- Add to cart buttons are hidden here since they are in the bottom sticky bar -->
+                <div class="d-none">
+                    <button type="button" class="add-to-cart" onclick="addToCart()">Add to cart</button>
+                    <button type="button" class="buy-now" onclick="buyNow()">Buy Now</button>
                 </div>
             @endif
-        @endif
+        </form>
     @endif
-
-    <!-- Share -->
-    <div class="row no-gutters mt-4">
-        <div class="col-sm-2">
-            <div class="text-secondary fs-13 fw-400 mt-2">{{ translate('Share') }}</div>
-        </div>
-        <div class="col-sm-10">
-            <div class="aiz-share"></div>
-        </div>
-    </div>
+    
+    <style>
+        .aiz-megabox input:checked + .aiz-megabox-elem {
+            border: 2px solid #502288 !important;
+            background-color: #f8f9fa;
+            color: #502288 !important;
+        }
+        .aiz-megabox-elem {
+            border: 1px solid #e2e5ec;
+            color: #6c757d;
+        }
+        input[type="number"]::-webkit-outer-spin-button,
+        input[type="number"]::-webkit-inner-spin-button {
+            -webkit-appearance: none;
+            margin: 0;
+        }
+    </style>
 </div>
