@@ -68,7 +68,7 @@
             </div>
             <div>
                 @if(Auth::check())
-                    <a href="{{ route('checkout.shipping_info') }}" class="btn text-white fw-700 px-4 py-2 d-flex align-items-center gap-2 rounded-pill shadow-sm" style="background-color: #502288; font-size: 15px;">
+                    <a href="{{ route('checkout') }}" class="btn text-white fw-700 px-4 py-2 d-flex align-items-center gap-2 rounded-pill shadow-sm" style="background-color: #502288; font-size: 15px;">
                         Checkout <i class="las la-arrow-right fs-18"></i>
                     </a>
                 @else

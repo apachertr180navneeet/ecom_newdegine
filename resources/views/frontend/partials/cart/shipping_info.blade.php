@@ -83,33 +83,31 @@
                 @endphp
 
                 @if($address)
-                <div class="border {{ $is_disabled ? ' border-danger' : '' }} mb-3" id="default-address-box">
-                    <div class="row">
-                        <div class="col-md-8">
-                            <label class="aiz-megabox d-block bg-white mb-0">
-                                <input type="radio" name="single_address_id" value="{{ $address->id }}" {{ $address->id == $address_id && !$is_disabled ? 'checked' : '' }}
-                                             {{ $is_disabled ? 'disabled' : '' }}>
-                                <span class="d-flex p-3 aiz-megabox-elem border-0">
-                                    <span class="aiz-rounded-check flex-shrink-0 mt-1"></span>
-                                    <span class="pl-3 text-left w-xl-300px"  id="choose-default">
-                                        {{ $address ? $address->address : '' }}, {{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}-{{ $address->city->name }},{{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}
-                                        <br>  {{ $address->phone }}
+                <div class="card border-0 rounded-4 {{ $is_disabled ? 'border border-danger' : '' }} mb-3" id="default-address-box" style="box-shadow: 0 4px 15px rgba(0,0,0,0.03); overflow: hidden;">
+                    <div class="row align-items-center m-0">
+                        <div class="col-8 p-0">
+                            <label class="aiz-megabox d-block bg-white mb-0 h-100">
+                                <input type="radio" name="single_address_id" value="{{ $address->id }}" {{ $address->id == $address_id && !$is_disabled ? 'checked' : '' }} {{ $is_disabled ? 'disabled' : '' }}>
+                                <span class="d-flex p-3 p-md-4 aiz-megabox-elem border-0 h-100 align-items-center">
+                                    <span class="aiz-rounded-check flex-shrink-0" style="border-color: #502288;"></span>
+                                    <span class="pl-3 text-left" id="choose-default" style="line-height: 1.4;">
+                                        <span class="d-block text-dark fw-600 fs-14 mb-1">{{ $address->address }}</span>
+                                        <span class="d-block text-muted fs-13 mb-1">{{ $address->area ? $address->area->name . ',' : '' }} {{ $address->postal_code }}-{{ $address->city->name }}, {{ $address->state && $address->state->status == 1 ? $address->state->name . ',' : '' }} {{ optional($address->country)->name }}</span>
+                                        <span class="d-block text-primary fw-600 fs-13"><i class="las la-phone mr-1"></i>{{ $address->phone }}</span>
                                     </span>
                                 </span>
                             </label>
                         </div>
-                        <!-- Always show Change button -->
-                        <div class="col-md-4 p-3 text-right">
-                            <a id="default-address-change-btn" class="btn btn-sm btn-secondary-base text-white mr-3 rounded-pill px-4"
-                                onclick="edit_address('{{ $address->id }}')">
-                                {{ translate('Change') }}
-                            </a>
+                        <div class="col-4 p-3 text-right" style="background-color: #fafbfc; height: 100%; border-left: 1px dashed #eee;">
+                            <button type="button" id="default-address-change-btn" class="btn btn-sm text-white rounded-pill px-3 py-1 shadow-sm mt-3" style="background: linear-gradient(135deg, #502288, #7a3bc7); font-weight: 600;" onclick="edit_address('{{ $address->id }}')">
+                                {{ translate('Edit') }}
+                            </button>
                         </div>
 
                         @if($is_disabled)
-                        <div class="col-md-12" id="hide-no-longer-div">
-                            <div class="text-center text-danger">
-                                <span>{{ translate('We no longer deliver in this area.') }}</span>
+                        <div class="col-12 p-2" id="hide-no-longer-div" style="background-color: #fff1f0;">
+                            <div class="text-center text-danger fs-12 fw-600">
+                                <i class="las la-exclamation-circle mr-1"></i>{{ translate('We no longer deliver in this area.') }}
                             </div>
                         </div>
                         @endif
@@ -119,22 +117,23 @@
 
                 <input type="hidden" name="checkout_type" value="logged">
 
-                <div class="d-flex flex-wrap align-items-center justify-content-between">
+                <div class="d-flex flex-wrap align-items-center justify-content-between mt-4">
                     @if($address)
                     <div class="form-group form-check px-0 py-1 m-0">
-                        <label class="aiz-checkbox m-0">
+                        <label class="aiz-checkbox m-0 d-flex align-items-center">
                             <input type="radio" data-type="shipping" name="billing_address_id" value="" required>
-                            <span class="fs-14 fw-300 text-reset">{{ translate('Use this as billing address') }}</span>
-                            <span class="aiz-square-check"></span>
+                            <span class="aiz-square-check mr-2"></span>
+                            <span class="fs-14 fw-600 text-dark">{{ translate('Use this as billing address') }}</span>
                         </label>
                     </div>
                     @endif
                     <!-- Add New Address -->
                     <div class="py-1">
-                        <div class="border c-pointer text-center py-2 px-3 bg-soft-blue has-transition d-flex justify-content-center rounded-pill"
+                        <div class="c-pointer text-center py-2 px-4 shadow-sm has-transition d-flex align-items-center justify-content-center rounded-pill"
+                            style="background-color: #eff3fa;"
                             onclick="add_new_address()">
-                            <i class="las la-plus fs-20 fw-bold text-blue"></i>
-                            <div class="alpha-7 fs-14 text-blue fw-700 ml-2">{{ translate('Add New Address') }}</div>
+                            <i class="las la-plus fs-18 fw-bold text-primary mr-1"></i>
+                            <span class="fs-13 text-primary fw-700">{{ translate('Add New Address') }}</span>
                         </div>
                     </div>
                 </div>

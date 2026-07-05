@@ -7,7 +7,7 @@
         
         <a href="{{ $product_url }}" class="d-block h-100 w-100">
             <img class="img-fluid w-100 h-100 object-fit-cover"
-                src="{{ get_image($product->thumbnail) }}"
+                src="{{ uploaded_asset($product->thumbnail_img) }}"
                 alt="{{ $product->getTranslation('name') }}"
                 onerror="this.onerror=null;this.src='{{ static_asset('assets/img/placeholder.jpg') }}';">
         </a>
